@@ -1,4 +1,7 @@
 import pygame
+import os
+import sys
+import math
 
 # Initializing Pygame
 pygame.init()
@@ -14,6 +17,20 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 tile_size = 50
 keys = pygame.key.get_pressed()
+clock = pygame.time.Clock()
+clock_speed = 30
+
+# Surfaces
+player_surf = pygame.image.load("graphics/White_square.png")
+bg = pygame.image.load(os.path.join("graphics/Dungeon_Backgrond_1.png")).convert()
+
+bgx = 0
+bgx2 = bg.get_width()
+
+# Rects
+player_rect = player_surf.get_rect()
+bg_rect = bg.get_rect()
+
 
 # test world map
 world_data =[
@@ -36,6 +53,9 @@ def draw_grid():
     for line in range(0, 20):
         pygame.draw.line(screen, white, (0, line * tile_size), (scr_width, line* tile_size))
         pygame.draw.line(screen, white, (line * tile_size, 0), (line * tile_size, scr_height))
+
+
+
 
 # Classes
 
@@ -70,17 +90,19 @@ class World():
 
 
 world = World(world_data)
-# Surfaces
-player_surf = pygame.image.load("graphics/White_square.png")
 
-# Rects
-player_rect = player_surf.get_rect()
+def main_menu():
+    pygame.draw.rect(bg, bg_rect, midright=0)
+    screen.blit(bg, (bgx2, 0))
+    pygame.display.update()
+
 
 # Setting the exit condition
 game_over = False
 
 # While loop for active game
 while not game_over:
+
     # Main loop for events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -91,10 +113,22 @@ while not game_over:
             if event.key == pygame.K_h:
                 pygame.image.save(screen, "graphics/screenshot.png")
 
+
+    clock.tick(clock_speed)
+    main_menu()
+    bgx -= 1.4
+    bgx2 -= 1.4
+
+    if bgx < bg.get_width() * -1:
+        bgx = bg.get_width()
+    if bgx2 < bg.get_width() * -1:
+        bgx2 = bg.get_width()
+
+
     # Screen clearing
     screen.fill(black)
-    world.draw()
-    draw_grid()
+    # world.draw()
+    # draw_grid()
 
     # Screen updating
     pygame.display.flip()
