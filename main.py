@@ -12,10 +12,60 @@ pygame.display.set_caption("Platformer")
 
 # Constants
 white = (255, 255, 255)
+black = (0, 0, 0)
+tile_size = 50
+
+# test world map
+world_data =[
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+
+# Classes
+class World():
+    def __init__(self, data):
+        self.tile_list = []
+
+        border = pygame.image.load("graphics/Dark_blue.png")
+
+        row_count = 0
+        for row in data:
+            column_count = 0
+            for tile in row:
+                if tile == 1:
+                    img = pygame.transform.scale(border, (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = column_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
+                column_count += 1
+            row_count += 1
+
+    def draw(self):
+        for tile in self.tile_list:
+            screen.blit(tile[0], tile[1])
+
+
+world = World(world_data)
+# Surfaces
+player_surf = pygame.image.load("graphics/White_square.png")
+
+# Rects
+player_rect = player_surf.get_rect()
 
 # Setting the exit condition
 game_over = False
-
 
 # While loop for active game
 while not game_over:
@@ -25,9 +75,11 @@ while not game_over:
             game_over = True
 
     # Screen clearing
-    screen.fill(white)
+    screen.fill(black)
+    world.draw()
 
     # Screen updating
     pygame.display.flip()
+
 
 pygame.quit()
