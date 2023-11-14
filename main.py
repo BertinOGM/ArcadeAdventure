@@ -61,12 +61,53 @@ def draw_grid():
 
 class Player():
     def __init__(self, x, y):
+        # Player image loading to rect
         img = pygame.image.load("graphics/Sprites/slime-idle-0.png").convert_alpha()
-        self.image = pygame.transform.scale(img, (40, 80))
+        self.image = pygame.transform.scale(img, (55, 70))
         self.rect = self.image.get_rect()
+        # Player coordinate passing
         self.rect.x = x
         self.rect.y = y
+        self.vel_y = 0
+        self.jumped = False
 
+    def movement(self):
+
+        dx = 0
+        dy = 0
+
+        # Keypresses
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT] or key[pygame.K_a]:
+            dx -= 5
+        if key[pygame.K_RIGHT] or key[pygame.K_d]:
+            dx += 5
+        if key[pygame.K_SPACE] and self.jumped == False:
+            self.vel_y = -10
+            self.jumped = True
+        if not key[pygame.K_SPACE]:
+            self.jumped = False
+
+        # gravity
+        self.vel_y += 1
+        if self.vel_y > 10:
+            self.vel_y = 10
+        dy += self.vel_y
+
+        # Player position
+        self.rect.x += dx
+        self.rect.y += dy
+
+        if self.rect.bottom > (scr_height - tile_size):
+            self.rect.bottom = (scr_height - tile_size)
+
+    def update(self):
+
+        # Draw the player
+        screen.blit(self.image, self.rect)
+
+        # movement
+        player.movement()
 
 class World():
     def __init__(self, data):
@@ -93,14 +134,8 @@ class World():
             screen.blit(tile[0], tile[1])
 
 
-player = Player(100, (scr_height - 130))
+player = Player(98, (scr_height - 118))
 world = World(world_data)
-
-
-def main_menu():
-    screen.blit(bg, bg_rect)
-    screen.blit(bg, bg_rect)
-    pygame.display.update()
 
 
 # Setting the exit condition
@@ -126,20 +161,23 @@ while not game_over:
         while i < tiles:
             screen.blit(bg, (bg.get_width() * i + scroll, 0))
             i += 1
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_i:
+                        menu = False
 
         scroll -= 0.08
 
         if abs(scroll) > bg.get_width():
             scroll = 0
         pygame.display.flip()
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_i:
-                menu = False
+
 
     # Screen clearing
-    # screen.fill(black)
-    # world.draw()
-    # draw_grid()
+    screen.fill(black)
+    world.draw()
+    draw_grid()
+    player.update()
 
     # Screen updating
     pygame.display.flip()
