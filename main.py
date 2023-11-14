@@ -62,12 +62,20 @@ def draw_grid():
 class Player():
     def __init__(self, x, y):
         self.images_idle = []
+        self.images_right = []
+        self.images_left = []
+        self.images_jump = []
         self.index = 0
         self.counter = 0
         for n in range(0, 4):
             img_idle = pygame.image.load(f"graphics/Sprites/slime-idle-{n}.png")
             img_idle = pygame.transform.scale(img_idle, (55, 70))
+            img_right = pygame.image.load(f"graphics/Sprites/slime-move-{n}.png")
+            img_right = pygame.transform.scale(img_right, (55, 70))
+            img_left = pygame.transform.flip(img_right, True, False)
             self.images_idle.append(img_idle)
+            self.images_right.append(img_right)
+            self.images_left.append(img_left)
 
         # Player image loading to rect
         self.image = self.images_idle[self.index]
@@ -77,6 +85,7 @@ class Player():
         self.rect.y = y
         self.vel_y = 0
         self.jumped = False
+        self.direction = 0
 
     def movement(self):
 
@@ -87,8 +96,12 @@ class Player():
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT] or key[pygame.K_a]:
             dx -= 5
+            self.counter += 1
+            self.direction = 1
         if key[pygame.K_RIGHT] or key[pygame.K_d]:
             dx += 5
+            self.counter += 1
+            self.direction = 1
         if key[pygame.K_SPACE] and self.jumped == False:
             self.vel_y = -10
             self.jumped = True
@@ -109,10 +122,17 @@ class Player():
             self.rect.bottom = (scr_height - tile_size)
 
     def animation(self):
-        self.index += 1
-        if self.index >= len(self.images_idle):
-            self.index = 0
-        self.image = self.images_idle[self.index]
+        self.counter += 1
+        if self.counter > 5:
+            self.counter = 0
+            self.index += 1
+            if self.index >= len(self.images_idle):
+                self.index = 0
+            if self.direction == 1:
+                self.image = self.images_right[self.index]
+            else:
+                self.image = self.images_idle[self.index]
+
 
     def update(self):
 
