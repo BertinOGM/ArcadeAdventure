@@ -61,9 +61,16 @@ def draw_grid():
 
 class Player():
     def __init__(self, x, y):
+        self.images_idle = []
+        self.index = 0
+        self.counter = 0
+        for n in range(0, 4):
+            img_idle = pygame.image.load(f"graphics/Sprites/slime-idle-{n}.png")
+            img_idle = pygame.transform.scale(img_idle, (55, 70))
+            self.images_idle.append(img_idle)
+
         # Player image loading to rect
-        img = pygame.image.load("graphics/Sprites/slime-idle-0.png").convert_alpha()
-        self.image = pygame.transform.scale(img, (55, 70))
+        self.image = self.images_idle[self.index]
         self.rect = self.image.get_rect()
         # Player coordinate passing
         self.rect.x = x
@@ -101,6 +108,12 @@ class Player():
         if self.rect.bottom > (scr_height - tile_size):
             self.rect.bottom = (scr_height - tile_size)
 
+    def animation(self):
+        self.index += 1
+        if self.index >= len(self.images_idle):
+            self.index = 0
+        self.image = self.images_idle[self.index]
+
     def update(self):
 
         # Draw the player
@@ -108,6 +121,7 @@ class Player():
 
         # movement
         player.movement()
+        player.animation()
 
 class World():
     def __init__(self, data):
