@@ -41,13 +41,13 @@ world_data = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
@@ -69,10 +69,10 @@ class Player():
         self.index = 0
         self.counter = 0
         for n in range(0, 4):
-            img_idle = pygame.image.load(f"graphics/Sprites/slime-idle-{n}.png")
-            img_idle = pygame.transform.scale(img_idle, (55, 40))
-            img_right = pygame.image.load(f"graphics/Sprites/slime-move-{n}.png")
-            img_right = pygame.transform.scale(img_right, (55, 40))
+            img_idle = pygame.image.load(f"graphics/Sprites/Player/slime-idle-{n}.png")
+            img_idle = pygame.transform.scale(img_idle, (45, 37))
+            img_right = pygame.image.load(f"graphics/Sprites/Player/slime-move-{n}.png")
+            img_right = pygame.transform.scale(img_right, (45, 37))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_idle.append(img_idle)
             self.images_right.append(img_right)
@@ -156,6 +156,7 @@ class Player():
 
         # Draw the player
         screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, white, self.rect, 1)
 
         # movement
         player.movement()
@@ -166,7 +167,7 @@ class World():
     def __init__(self, data):
         self.tile_list = []
 
-        border = pygame.image.load("graphics/Wall_brick.png")
+        border = pygame.image.load("graphics/Tileset/tile000.png")
 
         row_count = 0
         for row in data:
@@ -179,6 +180,9 @@ class World():
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
+                if tile == 2:
+                    bat = Enemy(column_count * tile_size, row_count * tile_size - 6)
+                    batGroup.add(bat)
                 column_count += 1
             row_count += 1
 
@@ -186,8 +190,27 @@ class World():
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("graphics/Sprites/Enemy/tile034.png")
+        self.image = pygame.transform.scale(self.image, (55,55))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = 1
+        self.posCounter = 0
+
+    def update(self):
+        self.rect.x += self.direction
+        self.posCounter += 1
+        if abs(self.posCounter) > 50:
+            self.direction *= -1
+            self.posCounter *= -1
+
 
 player = Player(98, (scr_height - 180))
+batGroup = pygame.sprite.Group()
 world = World(world_data)
 
 
@@ -229,6 +252,8 @@ while not game_over:
     # Screen clearing
     screen.fill(black)
     world.draw()
+    batGroup.update()
+    batGroup.draw(screen)
     draw_grid()
     player.update()
 
