@@ -21,6 +21,7 @@ clock = pygame.time.Clock()
 clock_speed = 30
 scroll = 0
 n = 0
+game_over = 0
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -42,12 +43,12 @@ world_data = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+    [1, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
@@ -135,6 +136,10 @@ class Player():
                     dy = tile[1].top - self.rect.bottom
                     self.vel_y = 0
 
+        # Enemy collision
+        if pygame.sprite.spritecollide(self, batGroup, False):
+            gameover = True
+
         # Player position
         self.rect.x += dx
         self.rect.y += dy
@@ -152,16 +157,20 @@ class Player():
                 self.image = self.images_idle[self.index]
 
 
-    def update(self):
+    def update(self, game_over):
+
+        if game_over == 0:
+
+            # movement
+            player.movement()
+            player.animation()
 
         # Draw the player
         screen.blit(self.image, self.rect)
         pygame.draw.rect(screen, white, self.rect, 1)
 
-        # movement
-        player.movement()
-        player.animation()
-    # player.collision()
+        return game_over
+
 
 class World():
     def __init__(self, data):
@@ -183,6 +192,9 @@ class World():
                 if tile == 2:
                     bat = Enemy(column_count * tile_size, row_count * tile_size - 6)
                     batGroup.add(bat)
+                if tile == 3:
+                    spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size//2))
+                    spikeGroup.add(spike)
                 column_count += 1
             row_count += 1
 
@@ -208,9 +220,20 @@ class Enemy(pygame.sprite.Sprite):
             self.direction *= -1
             self.posCounter *= -1
 
+class Spike(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("graphics/Tileset/tile038.png")
+        self.image = pygame.transform.scale(self.image, (tile_size, tile_size//2))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.direction = 1
+        self.posCounter = 0
 
 player = Player(98, (scr_height - 180))
 batGroup = pygame.sprite.Group()
+spikeGroup = pygame.sprite.Group()
 world = World(world_data)
 
 
@@ -254,8 +277,9 @@ while not game_over:
     world.draw()
     batGroup.update()
     batGroup.draw(screen)
+    spikeGroup.draw(screen)
     draw_grid()
-    player.update()
+    game_over = player.update(game_over)
 
     # Screen updating
     pygame.display.flip()
