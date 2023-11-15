@@ -70,9 +70,9 @@ class Player():
         self.counter = 0
         for n in range(0, 4):
             img_idle = pygame.image.load(f"graphics/Sprites/slime-idle-{n}.png")
-            img_idle = pygame.transform.scale(img_idle, (55, 70))
+            img_idle = pygame.transform.scale(img_idle, (55, 40))
             img_right = pygame.image.load(f"graphics/Sprites/slime-move-{n}.png")
-            img_right = pygame.transform.scale(img_right, (55, 70))
+            img_right = pygame.transform.scale(img_right, (55, 40))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_idle.append(img_idle)
             self.images_right.append(img_right)
@@ -106,7 +106,7 @@ class Player():
             self.counter += 1
             self.direction = 1
         if key[pygame.K_SPACE] and self.jumped == False:
-            self.vel_y = -10
+            self.vel_y = -11
             self.jumped = True
         if not key[pygame.K_SPACE]:
             self.jumped = False
@@ -119,21 +119,25 @@ class Player():
 
 
         for tile in world.tile_list:
+
+            # X collision
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+                dx = 0
+
+            # Y collision
             if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
                 # Top collision
                 if self.vel_y < 0:
                     dy = tile[1].bottom - self.rect.top
+                    self.vel_y = 0
                 # Bottom collision
-                if self.vel_y >= 0:
+                elif self.vel_y >= 0:
                     dy = tile[1].top - self.rect.bottom
+                    self.vel_y = 0
 
         # Player position
         self.rect.x += dx
         self.rect.y += dy
-
- #       if self.rect.bottom > (scr_height - tile_size):
-  #          self.rect.bottom = (scr_height - tile_size)
-
 
     def animation(self):
         self.counter += 1
@@ -147,15 +151,11 @@ class Player():
             else:
                 self.image = self.images_idle[self.index]
 
-    #def collision(self):
-
-
 
     def update(self):
 
         # Draw the player
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
         # movement
         player.movement()
@@ -185,7 +185,6 @@ class World():
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
-            pygame.draw.rect(screen, white, tile[1], 1)
 
 
 player = Player(98, (scr_height - 180))
@@ -209,7 +208,6 @@ while not game_over:
             if event.key == pygame.K_h:
                 pygame.image.save(screen, f"graphics/screenshot{n}.png")
                 n += 1
-
     while menu:
 
         i = 0
