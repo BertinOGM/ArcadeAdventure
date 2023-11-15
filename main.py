@@ -117,21 +117,20 @@ class Player():
             self.vel_y = 10
         dy += self.vel_y
 
+
+        for tile in world.tile_list:
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                if self.vel_y < 0:
+                    dy = tile[1].bottom - self.rect.top
+                if self.vel_y >= 0:
+                    dy = tile[1].bottom - self.rect.bottom
+
         # Player position
         self.rect.x += dx
         self.rect.y += dy
 
  #       if self.rect.bottom > (scr_height - tile_size):
   #          self.rect.bottom = (scr_height - tile_size)
-
-        for tile in world.tile_list:
-            # check in y-axis
-            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
-                if self.vel_y < 0:
-                    dy = tile[1].bottom - self.rect.top
-                if self.vel_y >= 0:
-                    dy = tile[1].top - self.rect.bottom
-
 
 
     def animation(self):
@@ -184,9 +183,10 @@ class World():
     def draw(self):
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
+            pygame.draw.rect(screen, white, tile[1], 1)
 
 
-player = Player(98, (scr_height - 118))
+player = Player(98, (scr_height - 180))
 world = World(world_data)
 
 
