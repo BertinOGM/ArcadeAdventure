@@ -20,6 +20,7 @@ keys = pygame.key.get_pressed()
 clock = pygame.time.Clock()
 clock_speed = 30
 scroll = 0
+n = 0
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -83,6 +84,8 @@ class Player():
         # Player coordinate passing
         self.rect.x = x
         self.rect.y = y
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
         self.vel_y = 0
         self.jumped = False
         self.direction = 0
@@ -118,8 +121,18 @@ class Player():
         self.rect.x += dx
         self.rect.y += dy
 
-        if self.rect.bottom > (scr_height - tile_size):
-            self.rect.bottom = (scr_height - tile_size)
+ #       if self.rect.bottom > (scr_height - tile_size):
+  #          self.rect.bottom = (scr_height - tile_size)
+
+        for tile in world.tile_list:
+            # check in y-axis
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                if self.vel_y < 0:
+                    dy = tile[1].bottom - self.rect.top
+                if self.vel_y >= 0:
+                    dy = tile[1].top - self.rect.bottom
+
+
 
     def animation(self):
         self.counter += 1
@@ -133,15 +146,20 @@ class Player():
             else:
                 self.image = self.images_idle[self.index]
 
+    #def collision(self):
+
+
 
     def update(self):
 
         # Draw the player
         screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)
 
         # movement
         player.movement()
         player.animation()
+    # player.collision()
 
 class World():
     def __init__(self, data):
@@ -187,7 +205,8 @@ while not game_over:
         # Testing screenshot function
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_h:
-                pygame.image.save(screen, "graphics/screenshot.png")
+                pygame.image.save(screen, f"graphics/screenshot{n}.png")
+                n += 1
 
     while menu:
 
