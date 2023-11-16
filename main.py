@@ -29,6 +29,7 @@ player_surf = pygame.image.load("graphics/White_square.png")
 bg = pygame.image.load(os.path.join("graphics/Dungeon_Backgrond_1.png")).convert()
 bg = pygame.transform.scale(bg, (scr_width, scr_height))
 tiles = math.ceil(scr_width / bg.get_width()) + 1
+restart_img = pygame.image.load("graphics/Tileset/Buttons/reset_button.png")
 
 bgx = 0
 bgx2 = bg.get_width()
@@ -61,6 +62,29 @@ def draw_grid():
 
 
 # Classes
+
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.image = pygame.transform.scale(self.image, (45, 45))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def draw(self):
+
+        # mouse position
+        pos = pygame.mouse.get_pos()
+
+        # check click
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1:
+                print("h")
+
+        # button drawing
+        screen.blit(self.image, self.rect)
+
+
 
 class Player():
     def __init__(self, x, y):
@@ -312,6 +336,8 @@ batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
 world = World(world_data)
 
+restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
+
 # Setting the exit condition
 gameover = False
 menu = True
@@ -355,6 +381,10 @@ while not gameover:
     spikeGroup.draw(screen)
     draw_grid()
     game_over = player.update(game_over)
+
+
+    if game_over == 1:
+        restart_button.draw()
 
     # Screen updating
     pygame.display.flip()
