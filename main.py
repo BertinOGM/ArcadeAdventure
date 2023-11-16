@@ -227,14 +227,14 @@ class Player():
 
         else:
             if not DoneDead:
-                self.counter += 1
-                if self.counter == 5:
+                self.deathcounter += 1
+                if self.deathcounter == 5:
                     self.image = self.images_death[0]
-                elif self.counter == 10:
+                elif self.deathcounter == 10:
                     self.image = self.images_death[1]
-                elif self.counter == 15:
+                elif self.deathcounter == 15:
                     self.image = self.images_death[2]
-                else:
+                elif self.deathcounter >= 20:
                     self.image = self.images_death[3]
                     DoneDead = True
 
