@@ -91,58 +91,58 @@ class Player():
         self.jumped = False
         self.direction = 0
 
-    def movement(self):
+    # def movement(self):
+    #
+    #     dx = 0
+    #     dy = 0
 
-        dx = 0
-        dy = 0
-
-        # Keypresses
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT] or key[pygame.K_a]:
-            dx -= 5
-            self.counter += 1
-            self.direction = 1
-        if key[pygame.K_RIGHT] or key[pygame.K_d]:
-            dx += 5
-            self.counter += 1
-            self.direction = 1
-        if key[pygame.K_SPACE] and self.jumped == False:
-            self.vel_y = -11
-            self.jumped = True
-        if not key[pygame.K_SPACE]:
-            self.jumped = False
-
-        # gravity
-        self.vel_y += 1
-        if self.vel_y > 10:
-            self.vel_y = 10
-        dy += self.vel_y
-
-
-        for tile in world.tile_list:
-
-            # X collision
-            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
-                dx = 0
-
-            # Y collision
-            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
-                # Top collision
-                if self.vel_y < 0:
-                    dy = tile[1].bottom - self.rect.top
-                    self.vel_y = 0
-                # Bottom collision
-                elif self.vel_y >= 0:
-                    dy = tile[1].top - self.rect.bottom
-                    self.vel_y = 0
-
-        # Enemy collision
-        if pygame.sprite.spritecollide(self, batGroup, False):
-            gameover = True
-
-        # Player position
-        self.rect.x += dx
-        self.rect.y += dy
+    # # Keypresses
+    # key = pygame.key.get_pressed()
+    # if key[pygame.K_LEFT] or key[pygame.K_a]:
+    #     dx -= 5
+    #     self.counter += 1
+    #     self.direction = 1
+    # if key[pygame.K_RIGHT] or key[pygame.K_d]:
+    #     dx += 5
+    #     self.counter += 1
+    #     self.direction = 1
+    # if key[pygame.K_SPACE] and self.jumped == False:
+    #     self.vel_y = -11
+    #     self.jumped = True
+    # if not key[pygame.K_SPACE]:
+    #     self.jumped = False
+    #
+    # # gravity
+    # self.vel_y += 1
+    # if self.vel_y > 10:
+    #     self.vel_y = 10
+    # dy += self.vel_y
+    #
+    #
+    # for tile in world.tile_list:
+    #
+    #     # X collision
+    #     if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+    #         dx = 0
+    #
+    #     # Y collision
+    #     if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+    #         # Top collision
+    #         if self.vel_y < 0:
+    #             dy = tile[1].bottom - self.rect.top
+    #             self.vel_y = 0
+    #         # Bottom collision
+    #         elif self.vel_y >= 0:
+    #             dy = tile[1].top - self.rect.bottom
+    #             self.vel_y = 0
+    #
+    # # Enemy collision
+    # if pygame.sprite.spritecollide(self, batGroup, False):
+    #     game_over = True
+    #
+    # # Player position
+    # self.rect.x += dx
+    # self.rect.y += dy
 
     def animation(self):
         self.counter += 1
@@ -156,13 +156,63 @@ class Player():
             else:
                 self.image = self.images_idle[self.index]
 
-
     def update(self, game_over):
+
+        dx = 0
+        dy = 0
 
         if game_over == 0:
 
             # movement
-            player.movement()
+            # Keypresses
+            key = pygame.key.get_pressed()
+            if key[pygame.K_LEFT] or key[pygame.K_a]:
+                dx -= 5
+                self.counter += 1
+                self.direction = 1
+            if key[pygame.K_RIGHT] or key[pygame.K_d]:
+                dx += 5
+                self.counter += 1
+                self.direction = 1
+            if key[pygame.K_SPACE] and self.jumped == False:
+                self.vel_y = -11
+                self.jumped = True
+            if not key[pygame.K_SPACE]:
+                self.jumped = False
+
+            # gravity
+            self.vel_y += 1
+            if self.vel_y > 10:
+                self.vel_y = 10
+            dy += self.vel_y
+
+            for tile in world.tile_list:
+
+                # X collision
+                if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
+                    dx = 0
+
+                # Y collision
+                if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                    # Top collision
+                    if self.vel_y < 0:
+                        dy = tile[1].bottom - self.rect.top
+                        self.vel_y = 0
+                    # Bottom collision
+                    elif self.vel_y >= 0:
+                        dy = tile[1].top - self.rect.bottom
+                        self.vel_y = 0
+
+            # Enemy collision
+            if pygame.sprite.spritecollide(self, batGroup, False):
+                game_over = True
+
+            if pygame.sprite.spritecollide(self, spikeGroup, False):
+                game_over = True
+
+            # Player position
+            self.rect.x += dx
+            self.rect.y += dy
             player.animation()
 
         # Draw the player
@@ -193,7 +243,7 @@ class World():
                     bat = Enemy(column_count * tile_size, row_count * tile_size - 6)
                     batGroup.add(bat)
                 if tile == 3:
-                    spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size//2))
+                    spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size // 2))
                     spikeGroup.add(spike)
                 column_count += 1
             row_count += 1
@@ -202,11 +252,12 @@ class World():
         for tile in self.tile_list:
             screen.blit(tile[0], tile[1])
 
+
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("graphics/Sprites/Enemy/tile034.png")
-        self.image = pygame.transform.scale(self.image, (55,55))
+        self.image = pygame.transform.scale(self.image, (55, 55))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -220,34 +271,35 @@ class Enemy(pygame.sprite.Sprite):
             self.direction *= -1
             self.posCounter *= -1
 
+
 class Spike(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("graphics/Tileset/tile038.png")
-        self.image = pygame.transform.scale(self.image, (tile_size, tile_size//2))
+        self.image = pygame.transform.scale(self.image, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.direction = 1
         self.posCounter = 0
 
+
 player = Player(98, (scr_height - 180))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
 world = World(world_data)
 
-
 # Setting the exit condition
-game_over = False
+gameover = False
 menu = True
 
 # While loop for active game
-while not game_over:
+while not gameover:
     clock.tick(clock_speed)
     # Main loop for events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            game_over = True
+            gameover = True
 
         # Testing screenshot function
         if event.type == pygame.KEYDOWN:
@@ -270,7 +322,6 @@ while not game_over:
         if abs(scroll) > bg.get_width():
             scroll = 0
         pygame.display.flip()
-
 
     # Screen clearing
     screen.fill(black)
