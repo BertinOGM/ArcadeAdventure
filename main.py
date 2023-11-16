@@ -70,56 +70,30 @@ class Button():
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.clicked = False
 
     def draw(self):
-
+        action = False
         # mouse position
         pos = pygame.mouse.get_pos()
 
         # check click
         if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1:
-                print("h")
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
 
         # button drawing
         screen.blit(self.image, self.rect)
-
+        return action
 
 
 class Player():
     def __init__(self, x, y):
-        self.images_idle = []
-        self.images_right = []
-        self.images_left = []
-        self.images_jump = []
-        self.images_death = []
-        self.index = 0
-        self.counter = 0
-        self.deathcounter = 0
-        for n in range(0, 4):
-            img_idle = pygame.image.load(f"graphics/Sprites/Player/slime-idle-{n}.png")
-            img_idle = pygame.transform.scale(img_idle, (45, 37))
-            img_right = pygame.image.load(f"graphics/Sprites/Player/slime-move-{n}.png")
-            img_right = pygame.transform.scale(img_right, (45, 37))
-            img_left = pygame.transform.flip(img_right, True, False)
-            img_dead = pygame.image.load(f"graphics/Sprites/Player/slime-die-{n}.png")
-            img_dead = pygame.transform.scale(img_dead, (45, 37))
-            self.images_idle.append(img_idle)
-            self.images_right.append(img_right)
-            self.images_left.append(img_left)
-            self.images_death.append(img_dead)
-
-        # Player image loading to rect
-        self.image = self.images_idle[self.index]
-        self.rect = self.image.get_rect()
-        # Player coordinate passing
-        self.rect.x = x
-        self.rect.y = y
-        self.width = self.image.get_width()
-        self.height = self.image.get_height()
-        self.vel_y = 0
-        self.jumped = False
-        self.direction = 0
+        self.reset(x, y)
 
     # def movement(self):
     #
@@ -206,7 +180,8 @@ class Player():
                 dx += 5
                 self.counter += 1
                 self.direction = 1
-            if key[pygame.K_SPACE] or key[pygame.K_w] or key[pygame.K_UP] and self.jumped == False:
+            if key[pygame.K_SPACE] or key[pygame.K_w] or key[
+                pygame.K_UP] and self.jumped == False and self.inAir == False:
                 self.vel_y = -11
                 self.jumped = True
             if key[pygame.K_l]:
@@ -220,6 +195,8 @@ class Player():
                 self.vel_y = 10
             dy += self.vel_y
 
+            self.in_air = True
+            # Collision Checks
             for tile in world.tile_list:
 
                 # X collision
@@ -236,6 +213,7 @@ class Player():
                     elif self.vel_y >= 0:
                         dy = tile[1].top - self.rect.bottom
                         self.vel_y = 0
+                        self.in_air = False
 
             # Enemy collision
             if pygame.sprite.spritecollide(self, batGroup, False):
@@ -267,6 +245,41 @@ class Player():
         pygame.draw.rect(screen, white, self.rect, 1)
 
         return game_over
+
+    def reset(self, x, y):
+        self.images_idle = []
+        self.images_right = []
+        self.images_left = []
+        self.images_jump = []
+        self.images_death = []
+        self.index = 0
+        self.counter = 0
+        self.deathcounter = 0
+        for n in range(0, 4):
+            img_idle = pygame.image.load(f"graphics/Sprites/Player/slime-idle-{n}.png")
+            img_idle = pygame.transform.scale(img_idle, (45, 37))
+            img_right = pygame.image.load(f"graphics/Sprites/Player/slime-move-{n}.png")
+            img_right = pygame.transform.scale(img_right, (45, 37))
+            img_left = pygame.transform.flip(img_right, True, False)
+            img_dead = pygame.image.load(f"graphics/Sprites/Player/slime-die-{n}.png")
+            img_dead = pygame.transform.scale(img_dead, (45, 37))
+            self.images_idle.append(img_idle)
+            self.images_right.append(img_right)
+            self.images_left.append(img_left)
+            self.images_death.append(img_dead)
+
+        # Player image loading to rect
+        self.image = self.images_idle[self.index]
+        self.rect = self.image.get_rect()
+        # Player coordinate passing
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.vel_y = 0
+        self.jumped = False
+        self.direction = 0
+        self.in_air = True
 
 
 class World():
@@ -382,9 +395,10 @@ while not gameover:
     draw_grid()
     game_over = player.update(game_over)
 
-
     if game_over == 1:
-        restart_button.draw()
+        if restart_button.draw():
+            player.reset(98, (scr_height - 180))
+            game_over = False
 
     # Screen updating
     pygame.display.flip()
