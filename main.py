@@ -67,6 +67,7 @@ class Player():
         self.images_right = []
         self.images_left = []
         self.images_jump = []
+        self.images_death = []
         self.index = 0
         self.counter = 0
         for n in range(0, 4):
@@ -75,9 +76,11 @@ class Player():
             img_right = pygame.image.load(f"graphics/Sprites/Player/slime-move-{n}.png")
             img_right = pygame.transform.scale(img_right, (45, 37))
             img_left = pygame.transform.flip(img_right, True, False)
+            img_dead = pygame.image.load(f"graphics/Sprites/Player/slime-die-{n}.png")
             self.images_idle.append(img_idle)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
+            self.images_death.append(img_dead)
 
         # Player image loading to rect
         self.image = self.images_idle[self.index]
@@ -153,8 +156,10 @@ class Player():
                 self.index = 0
             if self.direction == 1:
                 self.image = self.images_right[self.index]
-            else:
+            elif self.direction == 0:
                 self.image = self.images_idle[self.index]
+            elif self.direction == 2:
+                self.image = self.images_death[self.index]
 
     def update(self, game_over):
 
@@ -174,9 +179,11 @@ class Player():
                 dx += 5
                 self.counter += 1
                 self.direction = 1
-            if key[pygame.K_SPACE] and self.jumped == False:
+            if key[pygame.K_SPACE] or key[pygame.K_w] or key[pygame.K_UP] and self.jumped == False:
                 self.vel_y = -11
                 self.jumped = True
+            if key[pygame.K_l]:
+                self.direction = 2
             if not key[pygame.K_SPACE]:
                 self.jumped = False
 
@@ -214,6 +221,9 @@ class Player():
             self.rect.x += dx
             self.rect.y += dy
             player.animation()
+
+        else:
+            self.direction = 2
 
         # Draw the player
         screen.blit(self.image, self.rect)
@@ -326,7 +336,8 @@ while not gameover:
     # Screen clearing
     screen.fill(black)
     world.draw()
-    batGroup.update()
+    if game_over == 0:
+        batGroup.update()
     batGroup.draw(screen)
     spikeGroup.draw(screen)
     draw_grid()
