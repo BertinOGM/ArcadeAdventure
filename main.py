@@ -22,6 +22,7 @@ clock_speed = 30
 scroll = 0
 n = 0
 game_over = 0
+DoneDead = False
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -70,6 +71,7 @@ class Player():
         self.images_death = []
         self.index = 0
         self.counter = 0
+        self.deathcounter = 0
         for n in range(0, 4):
             img_idle = pygame.image.load(f"graphics/Sprites/Player/slime-idle-{n}.png")
             img_idle = pygame.transform.scale(img_idle, (45, 37))
@@ -77,6 +79,7 @@ class Player():
             img_right = pygame.transform.scale(img_right, (45, 37))
             img_left = pygame.transform.flip(img_right, True, False)
             img_dead = pygame.image.load(f"graphics/Sprites/Player/slime-die-{n}.png")
+            img_dead = pygame.transform.scale(img_dead, (45, 37))
             self.images_idle.append(img_idle)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
@@ -148,6 +151,7 @@ class Player():
     # self.rect.y += dy
 
     def animation(self):
+
         self.counter += 1
         if self.counter > 5:
             self.counter = 0
@@ -158,11 +162,10 @@ class Player():
                 self.image = self.images_right[self.index]
             elif self.direction == 0:
                 self.image = self.images_idle[self.index]
-            elif self.direction == 2:
-                self.image = self.images_death[self.index]
 
     def update(self, game_over):
 
+        global DoneDead
         dx = 0
         dy = 0
 
@@ -223,7 +226,17 @@ class Player():
             player.animation()
 
         else:
-            self.direction = 2
+            if not DoneDead:
+                self.counter += 1
+                if self.counter == 5:
+                    self.image = self.images_death[0]
+                elif self.counter == 10:
+                    self.image = self.images_death[1]
+                elif self.counter == 15:
+                    self.image = self.images_death[2]
+                else:
+                    self.image = self.images_death[3]
+                    DoneDead = True
 
         # Draw the player
         screen.blit(self.image, self.rect)
