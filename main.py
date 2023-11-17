@@ -45,20 +45,20 @@ player_rect = player_surf.get_rect()
 bg_rect = bg.get_rect()
 
 # test world map
-world_data = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
+# world_data = [
+#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 5, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+#     [1, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
+#     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+# ]
 
 
 def draw_grid():
@@ -334,6 +334,9 @@ class World():
                 if tile == 3:
                     spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size // 2))
                     spikeGroup.add(spike)
+                if tile == 5:
+                    exittile = Exit(column_count * tile_size, row_count * tile_size - (tile_size // 2))
+                    exitGroup.add(exittile)
                 column_count += 1
             row_count += 1
 
@@ -356,6 +359,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.direction
         self.posCounter += 1
+        pygame.draw.rect(screen, white, self.rect, 1)
         if abs(self.posCounter) > 50:
             self.direction *= -1
             self.posCounter *= -1
@@ -372,15 +376,30 @@ class Spike(pygame.sprite.Sprite):
         self.direction = 1
         self.posCounter = 0
 
+class Exit(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load("graphics/Tileset/Buttons/exit.png")
+        self.image = pygame.transform.scale(img, (tile_size, int(tile_size * 1.5)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
 
 player = Player(98, (scr_height - 93))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
+exitGroup = pygame.sprite.Group()
 
 # Load level data
+# if path.exists(f"World_Data/level{level}_data"):
+#     pickle_input = open(f"World_Data/level{level}_data", "r")
+# world_data = pickle.load(pickle_input)
+
 if path.exists(f"World_Data/level{level}_data"):
-    pickle_in = open(f"World_Data/level{level}_data", "rb")
-world_data = pickle.load(pickle_in)
+    fo = open(f"World_Data/level{level}_data", "r")
+world_data = []
+world_data = fo.read()
 world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
@@ -430,11 +449,13 @@ while not gameover:
         if start_button.draw():
             main_menu = False
     else:
+       # print(world_data)
         world.draw()
         if game_over == 0:
             batGroup.update()
         batGroup.draw(screen)
         spikeGroup.draw(screen)
+        exitGroup.draw(screen)
         draw_grid()
         game_over = player.update(game_over)
 
