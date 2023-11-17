@@ -1,7 +1,8 @@
 import pygame
 import os
-import sys
+from os import path
 import math
+import pickle
 
 # Initializing Pygame
 pygame.init()
@@ -24,6 +25,7 @@ n = 0
 game_over = 0
 DoneDead = False
 main_menu = True
+level = 1
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -374,6 +376,11 @@ class Spike(pygame.sprite.Sprite):
 player = Player(98, (scr_height - 93))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
+
+# Load level data
+if path.exists(f"World_Data/level{level}_data"):
+    pickle_in = open(f"World_Data/level{level}_data", "rb")
+world_data = pickle.load(pickle_in)
 world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
