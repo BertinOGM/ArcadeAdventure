@@ -23,6 +23,7 @@ scroll = 0
 n = 0
 game_over = 0
 DoneDead = False
+main_menu = True
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -30,6 +31,9 @@ bg = pygame.image.load(os.path.join("graphics/Dungeon_Backgrond_1.png")).convert
 bg = pygame.transform.scale(bg, (scr_width, scr_height))
 tiles = math.ceil(scr_width / bg.get_width()) + 1
 restart_img = pygame.image.load("graphics/Tileset/Buttons/reset_button.png")
+start_img = pygame.image.load("graphics/Tileset/Buttons/start_btn.png")
+exit_img = pygame.image.load("graphics/Tileset/Buttons/exit_btn.png")
+
 
 bgx = 0
 bgx2 = bg.get_width()
@@ -66,7 +70,6 @@ def draw_grid():
 class Button():
     def __init__(self, x, y, image):
         self.image = image
-        self.image = pygame.transform.scale(self.image, (45, 45))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -93,7 +96,37 @@ class Button():
 
 class Player():
     def __init__(self, x, y):
-        self.reset(x, y)
+        self.images_idle = []
+        self.images_right = []
+        self.images_left = []
+        self.images_death = []
+        self.index = 0
+        self.counter = 0
+        self.deathcounter = 0
+        for n in range(0, 4):
+            img_idle = pygame.image.load(f"graphics/Sprites/Player/slime-idle-{n}.png")
+            img_idle = pygame.transform.scale(img_idle, (45, 37))
+            img_right = pygame.image.load(f"graphics/Sprites/Player/slime-move-{n}.png")
+            img_right = pygame.transform.scale(img_right, (45, 37))
+            img_left = pygame.transform.flip(img_right, True, False)
+            img_dead = pygame.image.load(f"graphics/Sprites/Player/slime-die-{n}.png")
+            img_dead = pygame.transform.scale(img_dead, (45, 37))
+            self.images_idle.append(img_idle)
+            self.images_right.append(img_right)
+            self.images_left.append(img_left)
+            self.images_death.append(img_dead)
+
+        # Player image loading to rect
+        self.image = self.images_idle[self.index]
+        self.rect = self.image.get_rect()
+        # Player coordinate passing
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width()
+        self.height = self.image.get_height()
+        self.vel_y = 0
+        self.jumped = False
+        self.direction = 0
 
     # def movement(self):
     #
@@ -180,8 +213,7 @@ class Player():
                 dx += 5
                 self.counter += 1
                 self.direction = 1
-            if key[pygame.K_SPACE] or key[pygame.K_w] or key[
-                pygame.K_UP] and self.jumped == False and self.inAir == False:
+            if key[pygame.K_SPACE] or key[pygame.K_w] or key[pygame.K_UP] and self.jumped == False:
                 self.vel_y = -11
                 self.jumped = True
             if key[pygame.K_l]:
@@ -195,8 +227,6 @@ class Player():
                 self.vel_y = 10
             dy += self.vel_y
 
-            self.in_air = True
-            # Collision Checks
             for tile in world.tile_list:
 
                 # X collision
@@ -213,7 +243,6 @@ class Player():
                     elif self.vel_y >= 0:
                         dy = tile[1].top - self.rect.bottom
                         self.vel_y = 0
-                        self.in_air = False
 
             # Enemy collision
             if pygame.sprite.spritecollide(self, batGroup, False):
@@ -250,7 +279,6 @@ class Player():
         self.images_idle = []
         self.images_right = []
         self.images_left = []
-        self.images_jump = []
         self.images_death = []
         self.index = 0
         self.counter = 0
@@ -279,7 +307,6 @@ class Player():
         self.vel_y = 0
         self.jumped = False
         self.direction = 0
-        self.in_air = True
 
 
 class World():
@@ -344,12 +371,14 @@ class Spike(pygame.sprite.Sprite):
         self.posCounter = 0
 
 
-player = Player(98, (scr_height - 180))
+player = Player(98, (scr_height - 93))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
 world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
+start_button = Button(scr_width // 2 - 125, scr_height // 2 - 200, start_img)
+exit_button = Button(scr_width // 2 - 105, scr_height // 2 + 100, exit_img)
 
 # Setting the exit condition
 gameover = False
@@ -387,18 +416,26 @@ while not gameover:
 
     # Screen clearing
     screen.fill(black)
-    world.draw()
-    if game_over == 0:
-        batGroup.update()
-    batGroup.draw(screen)
-    spikeGroup.draw(screen)
-    draw_grid()
-    game_over = player.update(game_over)
 
-    if game_over == 1:
-        if restart_button.draw():
-            player.reset(98, (scr_height - 180))
-            game_over = False
+    if main_menu:
+        if exit_button.draw():
+            gameover = True
+        if start_button.draw():
+            main_menu = False
+    else:
+        world.draw()
+        if game_over == 0:
+            batGroup.update()
+        batGroup.draw(screen)
+        spikeGroup.draw(screen)
+        draw_grid()
+        game_over = player.update(game_over)
+
+
+        if game_over == 1:
+            if restart_button.draw():
+                player.reset(98, (scr_height - 93))
+                game_over = False
 
     # Screen updating
     pygame.display.flip()
