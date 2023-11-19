@@ -45,21 +45,25 @@ player_rect = player_surf.get_rect()
 bg_rect = bg.get_rect()
 
 # test world map
-# world_data = [
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 5, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
-#     [1, 0, 0, 0, 0, 0, 1, 1, 1, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1],
-#     [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-#     [1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-#     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-# ]
 
+world_data_list = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 5, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
+
+pickle_out = open("World_Data/level2_data.txt", "wb")
+pickle.dump(world_data_list, pickle_out)
+pickle_out.close()
 
 def draw_grid():
     for line in range(0, 20):
@@ -392,14 +396,9 @@ spikeGroup = pygame.sprite.Group()
 exitGroup = pygame.sprite.Group()
 
 # Load level data
-# if path.exists(f"World_Data/level{level}_data"):
-#     pickle_input = open(f"World_Data/level{level}_data", "r")
-# world_data = pickle.load(pickle_input)
+pickle_in = open(f"World_Data/level{level}_data.txt", "rb")
+world_data = pickle.load(pickle_in)
 
-if path.exists(f"World_Data/level{level}_data"):
-    fo = open(f"World_Data/level{level}_data", "r")
-world_data = []
-world_data = fo.read()
 world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
@@ -433,6 +432,8 @@ while not gameover:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_i:
                         menu = False
+                    if event.key == pygame.K_l:
+                        level += 1
 
         scroll -= 0.08
 
