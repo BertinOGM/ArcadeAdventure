@@ -26,6 +26,7 @@ game_over = 0
 DoneDead = False
 main_menu = True
 level = 1
+max_levels = 2
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -36,6 +37,18 @@ restart_img = pygame.image.load("graphics/Tileset/Buttons/reset_button.png")
 start_img = pygame.image.load("graphics/Tileset/Buttons/start_btn.png")
 exit_img = pygame.image.load("graphics/Tileset/Buttons/exit_btn.png")
 
+
+def reset_level(level):
+    player.reset(98, (scr_height - 93))
+    batGroup.empty()
+    spikeGroup.empty()
+    exitGroup.empty()
+    if path.exists(f"World_Data/level{level}_data.txt"):
+        pickle_in = open(f"World_Data/level{level}_data.txt", "rb")
+        world_data = pickle.load(pickle_in)
+    world = World(world_data)
+
+    return world
 
 bgx = 0
 bgx2 = bg.get_width()
@@ -252,10 +265,13 @@ class Player():
 
             # Enemy collision
             if pygame.sprite.spritecollide(self, batGroup, False):
-                game_over = True
+                game_over = -1
 
             if pygame.sprite.spritecollide(self, spikeGroup, False):
-                game_over = True
+                game_over = -1
+
+            if pygame.sprite.spritecollide(self, exitGroup, False):
+                game_over = 1
 
             # Player position
             self.rect.x += dx
@@ -396,9 +412,9 @@ spikeGroup = pygame.sprite.Group()
 exitGroup = pygame.sprite.Group()
 
 # Load level data
-pickle_in = open(f"World_Data/level{level}_data.txt", "rb")
-world_data = pickle.load(pickle_in)
-
+if path.exists(f"World_Data/level{level}_data.txt"):
+    pickle_in = open(f"World_Data/level{level}_data.txt", "rb")
+    world_data = pickle.load(pickle_in)
 world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
@@ -460,11 +476,22 @@ while not gameover:
         draw_grid()
         game_over = player.update(game_over)
 
-
-        if game_over == 1:
+        # if player is dead
+        if game_over == -1:
             if restart_button.draw():
                 player.reset(98, (scr_height - 93))
-                game_over = False
+                game_over = 0
+
+        # if player has finished level
+        if game_over == 1:
+            level += 1
+            if level <= max_levels:
+                # reset level
+                world_data = []
+                world = reset_level(level)
+            else:
+                #restart game
+                pass
 
     # Screen updating
     pygame.display.flip()
