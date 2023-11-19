@@ -278,7 +278,7 @@ class Player():
             self.rect.y += dy
             player.animation()
 
-        else:
+        elif game_over == -1:
             if not DoneDead:
                 self.deathcounter += 1
                 if self.deathcounter == 5:
@@ -479,7 +479,8 @@ while not gameover:
         # if player is dead
         if game_over == -1:
             if restart_button.draw():
-                player.reset(98, (scr_height - 93))
+                world_data = []
+                world = reset_level(level)
                 game_over = 0
 
         # if player has finished level
@@ -489,6 +490,7 @@ while not gameover:
                 # reset level
                 world_data = []
                 world = reset_level(level)
+                game_over = 0
             else:
                 #restart game
                 pass
