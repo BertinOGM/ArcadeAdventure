@@ -70,7 +70,7 @@ world_data_list = [
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    [1, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ]
 
@@ -354,6 +354,9 @@ class World():
                 if tile == 3:
                     spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size // 2))
                     spikeGroup.add(spike)
+                if tile == 4:
+                    coin = Coin(column_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
+                    coinGroup.add(coin)
                 if tile == 5:
                     exittile = Exit(column_count * tile_size, row_count * tile_size - (tile_size // 2))
                     exitGroup.add(exittile)
@@ -396,6 +399,14 @@ class Spike(pygame.sprite.Sprite):
         self.direction = 1
         self.posCounter = 0
 
+class Coin(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load("graphics/Tileset/tile015.png")
+        self.image = pygame.transform.scale(self.image, (tile_size // 2, tile_size // 2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -405,10 +416,10 @@ class Exit(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-
 player = Player(98, (scr_height - 93))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
+coinGroup = pygame.sprite.Group()
 exitGroup = pygame.sprite.Group()
 
 # Load level data
@@ -472,6 +483,7 @@ while not gameover:
             batGroup.update()
         batGroup.draw(screen)
         spikeGroup.draw(screen)
+        coinGroup.draw(screen)
         exitGroup.draw(screen)
         draw_grid()
         game_over = player.update(game_over)
