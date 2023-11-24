@@ -13,6 +13,10 @@ scr_height = 600
 screen = pygame.display.set_mode((scr_width, scr_height))
 pygame.display.set_caption("Platformer")
 
+# Font
+font_1 = pygame.font.SysFont('Roboto', 60)
+font_2 = pygame.font.SysFont('Roboto', 25)
+
 # Constants
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -25,8 +29,9 @@ n = 0
 game_over = 0
 DoneDead = False
 main_menu = True
-level = 1
-max_levels = 2
+level = 0
+max_levels = 4
+score = 0
 
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
@@ -50,6 +55,12 @@ def reset_level(level):
 
     return world
 
+
+def draw_text(text, font, colour, x, y):
+    img = font.render(text, True, colour)
+    screen.blit(img, (x, y))
+
+
 bgx = 0
 bgx2 = bg.get_width()
 
@@ -57,26 +68,6 @@ bgx2 = bg.get_width()
 player_rect = player_surf.get_rect()
 bg_rect = bg.get_rect()
 
-# test world map
-
-world_data_list = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 5, 0, 2, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 4, 0, 4, 0, 4, 0, 4, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-]
-
-pickle_out = open("World_Data/level2_data.txt", "wb")
-pickle.dump(world_data_list, pickle_out)
-pickle_out.close()
 
 def draw_grid():
     for line in range(0, 20):
@@ -233,7 +224,7 @@ class Player():
                 self.counter += 1
                 self.direction = 1
             if key[pygame.K_SPACE] or key[pygame.K_w] or key[pygame.K_UP] and self.jumped == False:
-                self.vel_y = -11
+                self.vel_y = -13
                 self.jumped = True
             if key[pygame.K_l]:
                 self.direction = 2
@@ -293,7 +284,7 @@ class Player():
 
         # Draw the player
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, white, self.rect, 1)
+        # pygame.draw.rect(screen, white, self.rect, 1)
 
         return game_over
 
@@ -349,7 +340,7 @@ class World():
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
                 if tile == 2:
-                    bat = Enemy(column_count * tile_size, row_count * tile_size - 6)
+                    bat = Enemy(column_count * tile_size, row_count * tile_size + 8)
                     batGroup.add(bat)
                 if tile == 3:
                     spike = Spike(column_count * tile_size, row_count * tile_size + (tile_size // 2))
@@ -372,7 +363,7 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load("graphics/Sprites/Enemy/tile034.png")
-        self.image = pygame.transform.scale(self.image, (55, 55))
+        self.image = pygame.transform.scale(self.image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -382,7 +373,7 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.direction
         self.posCounter += 1
-        pygame.draw.rect(screen, white, self.rect, 1)
+        # pygame.draw.rect(screen, white, self.rect, 1)
         if abs(self.posCounter) > 50:
             self.direction *= -1
             self.posCounter *= -1
@@ -399,6 +390,7 @@ class Spike(pygame.sprite.Sprite):
         self.direction = 1
         self.posCounter = 0
 
+
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -406,6 +398,7 @@ class Coin(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (tile_size // 2, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+
 
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -416,17 +409,13 @@ class Exit(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
+
 player = Player(98, (scr_height - 93))
 batGroup = pygame.sprite.Group()
 spikeGroup = pygame.sprite.Group()
 coinGroup = pygame.sprite.Group()
 exitGroup = pygame.sprite.Group()
 
-# Load level data
-if path.exists(f"World_Data/level{level}_data.txt"):
-    pickle_in = open(f"World_Data/level{level}_data.txt", "rb")
-    world_data = pickle.load(pickle_in)
-world = World(world_data)
 
 restart_button = Button(scr_width // 2, scr_height // 2 + 25, restart_img)
 start_button = Button(scr_width // 2 - 125, scr_height // 2 - 200, start_img)
@@ -449,6 +438,7 @@ while not gameover:
             if event.key == pygame.K_h:
                 pygame.image.save(screen, f"graphics/screenshot{n}.png")
                 n += 1
+
     while menu:
 
         i = 0
@@ -476,24 +466,49 @@ while not gameover:
             gameover = True
         if start_button.draw():
             main_menu = False
+            world = reset_level(level)
     else:
-       # print(world_data)
+        # print(world_data)
         world.draw()
         if game_over == 0:
             batGroup.update()
+            # update score
+            if pygame.sprite.spritecollide(player, coinGroup, True):
+                score += 1
+            draw_text(str(score), font_1, white, scr_width // 2 - tile_size // 4.3, scr_height - (tile_size * 12) + tile_size // 8)
+            if level == 0:
+                draw_text('This is the player', font_2, white, scr_width // 15, scr_height - 140)
+                draw_text('Use A+D or the', font_2, white, scr_width // 15, scr_height - 120)
+                draw_text('Arrow keys to move', font_2, white, scr_width // 15, scr_height - 100)
+                draw_text('Press space to jump!', font_2, white, scr_width // 2.55, scr_height - 130)
+                draw_text('Collect coins', font_2, white, scr_width // 1.49, scr_height - 110)
+                draw_text('Reach the exit', font_2, white, scr_width - 175, scr_height - 165)
+                draw_text('to move on!', font_2, white, scr_width - 175, scr_height - 145)
+            elif level == 1:
+                draw_text('This is a spike', font_2, white, scr_width // 2 - 85, scr_height // 1.3)
+                draw_text('It will kill you :)', font_2, white, scr_width // 2 - 90, scr_height // 1.25)
+            elif level == 2:
+                draw_text('Try jump over these spikes!', font_2, white, scr_width // 2 - 150, scr_height // 1.4)
+            elif level == 3:
+                draw_text('This is an enemy', font_2, white, scr_width // 2 - 85, scr_height // 1.3)
+                draw_text('It will also kill you', font_2, white, scr_width // 2 - 95, scr_height // 1.25)
+            elif level == 4:
+                draw_text('Try this!', font_1, white, scr_width // 2 - 100, scr_height // 2)
         batGroup.draw(screen)
         spikeGroup.draw(screen)
         coinGroup.draw(screen)
         exitGroup.draw(screen)
-        draw_grid()
+        # draw_grid()
         game_over = player.update(game_over)
 
         # if player is dead
         if game_over == -1:
+            draw_text("You suck", font_1, white, scr_width // 2 - 100, scr_height // 2 - 100)
             if restart_button.draw():
                 world_data = []
                 world = reset_level(level)
                 game_over = 0
+                score = 0
 
         # if player has finished level
         if game_over == 1:
@@ -504,8 +519,12 @@ while not gameover:
                 world = reset_level(level)
                 game_over = 0
             else:
-                #restart game
-                pass
+                if restart_button.draw():
+                    level = 1
+                    world_data = []
+                    world = reset_level(level)
+                    game_over = 0
+
 
     # Screen updating
     pygame.display.flip()
