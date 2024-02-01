@@ -1,17 +1,20 @@
 import pygame
 import os
 from os import path
+from pygame import mixer
 import math
 import pickle
 
 # Initializing Pygame
 pygame.init()
+mixer.init()
 
 # Initializing the screen
 scr_width = 1000
 scr_height = 600
 screen = pygame.display.set_mode((scr_width, scr_height))
 pygame.display.set_caption("Platformer")
+pygame.mixer.pre_init(44100, -16, 2, 512)
 
 # Font
 font_1 = pygame.font.SysFont('Roboto', 60)
@@ -33,6 +36,7 @@ level = 0
 max_levels = 4
 score = 0
 
+
 # Surfaces
 player_surf = pygame.image.load("graphics/White_square.png")
 bg = pygame.image.load(os.path.join("graphics/Dungeon_Backgrond_1.png")).convert()
@@ -42,6 +46,12 @@ restart_img = pygame.image.load("graphics/Tileset/Buttons/reset_button.png")
 start_img = pygame.image.load("graphics/Tileset/Buttons/start_btn.png")
 exit_img = pygame.image.load("graphics/Tileset/Buttons/exit_btn.png")
 
+# Load sounds
+gameover_sound = pygame.mixer.Sound('Sounds/gameover.wav')
+gameover_sound.set_volume(0.3)
+jump_sound = pygame.mixer.Sound('Sounds/jump.wav')
+coin_sound = pygame.mixer.Sound('Sounds/coin.wav')
+coin_sound.set_volume(0.5)
 
 def reset_level(level):
     player.reset(98, (scr_height - 93))
@@ -137,6 +147,8 @@ class Player():
         self.vel_y = 0
         self.jumped = False
         self.direction = 0
+        self.air = 0
+        self.dashed = False
 
     # def movement(self):
     #
@@ -219,17 +231,28 @@ class Player():
                 dx -= 5
                 self.counter += 1
                 self.direction = 1
+            if key[pygame.K_LEFT] and key[pygame.K_LSHIFT] or key[pygame.K_a] and key[pygame.K_LSHIFT]:
+                dx -= 6
+                self.counter += 1
+                self.direction = 1
             if key[pygame.K_RIGHT] or key[pygame.K_d]:
                 dx += 5
                 self.counter += 1
                 self.direction = 1
-            if key[pygame.K_SPACE] or key[pygame.K_w] or key[pygame.K_UP] and self.jumped == False:
+            if key[pygame.K_RIGHT] and key[pygame.K_LSHIFT] and self.dashed == False or key[pygame.K_d] and key[pygame.K_LSHIFT] and self.dashed == False:
+                dx += 50
+                self.counter += 1
+                self.direction = 1
+                self.dashed = True
+            if key[pygame.K_SPACE] and self.jumped == False and self.air <= 1:
                 self.vel_y = -13
                 self.jumped = True
-            if key[pygame.K_l]:
-                self.direction = 2
+                self.air += 1
+                jump_sound.play()
             if not key[pygame.K_SPACE]:
                 self.jumped = False
+            if not key[pygame.K_LSHIFT]:
+                self.dashed = False
 
             # gravity
             self.vel_y += 1
@@ -253,13 +276,16 @@ class Player():
                     elif self.vel_y >= 0:
                         dy = tile[1].top - self.rect.bottom
                         self.vel_y = 0
+                        self.air = 0
 
             # Enemy collision
             if pygame.sprite.spritecollide(self, batGroup, False):
                 game_over = -1
+                gameover_sound.play()
 
             if pygame.sprite.spritecollide(self, spikeGroup, False):
                 game_over = -1
+                gameover_sound.play()
 
             if pygame.sprite.spritecollide(self, exitGroup, False):
                 game_over = 1
@@ -475,6 +501,7 @@ while not gameover:
             # update score
             if pygame.sprite.spritecollide(player, coinGroup, True):
                 score += 1
+                coin_sound.play()
             draw_text(str(score), font_1, white, scr_width // 2 - tile_size // 4.3, scr_height - (tile_size * 12) + tile_size // 8)
             if level == 0:
                 draw_text('This is the player', font_2, white, scr_width // 15, scr_height - 140)
@@ -520,7 +547,7 @@ while not gameover:
                 game_over = 0
             else:
                 if restart_button.draw():
-                    level = 1
+                    level = 0
                     world_data = []
                     world = reset_level(level)
                     game_over = 0
@@ -530,3 +557,21 @@ while not gameover:
     pygame.display.flip()
 
 pygame.quit()
+
+# if player is dead
+if game_over == -1:
+    if restart_button.draw():
+        player.reset(98, (scr_height - 93))
+        game_over = False
+        game_over = 0
+
+# if player has finished level
+if game_over == 1:
+    level += 1
+    if level <= max_levels:
+        # reset level
+        world_data = []
+        world = reset_level(level)
+    else:
+        # restart game
+        pass
